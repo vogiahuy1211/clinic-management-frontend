@@ -1,0 +1,225 @@
+.booking-wrapper {
+  background-color: #f0f7fd;
+  min-height: 100vh;
+  padding: 30px 20px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.booking-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(186, 215, 233, 0.45);
+  width: 100%;
+  max-width: 780px;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+.booking-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.booking-header h1 {
+  color: #1565c0;
+  margin: 0 0 6px 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.booking-header p {
+  color: #64748b;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Thanh tiến trình các bước (Steps indicator) */
+.steps-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.steps-nav::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  right: 30px;
+  height: 2px;
+  background-color: #e2e8f0;
+  z-index: 1;
+}
+
+.step-item {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  padding: 0 8px;
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  border: 2px solid #cbd5e1;
+  transition: all 0.3s ease;
+}
+
+.step-item.active .step-number {
+  background: #1976d2;
+  color: #ffffff;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 4px rgba(25, 118, 210, 0.2);
+}
+
+.step-item.done .step-number {
+  background: #2e7d32;
+  color: #ffffff;
+  border-color: #2e7d32;
+}
+
+.step-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.step-item.active .step-label {
+  color: #1976d2;
+}
+
+/* Lưới hiển thị ca trực (Schedules Grid) */
+.schedules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.schedule-card {
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #ffffff;
+}
+
+.schedule-card:hover {
+  border-color: #90caf9;
+  background: #f8fbff;
+}
+
+.schedule-card.selected {
+  border-color: #1976d2;
+  background: #e3f2fd;
+  box-shadow: 0 4px 10px rgba(25, 118, 210, 0.15);
+}
+
+.schedule-card h4 {
+  margin: 0 0 6px 0;
+  color: #0d47a1;
+  font-size: 15px;
+}
+
+.schedule-card p {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+/* Box kết quả vé khám thành công */
+.ticket-container {
+  border: 2px dashed #90caf9;
+  background: #f0f7fd;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #bbdefb;
+  padding-bottom: 10px;
+}
+
+.ticket-id {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1565c0;
+}
+
+.ticket-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.ticket-label {
+  color: #64748b;
+}
+
+.ticket-value {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Nút bấm điều hướng */
+.button-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 28px;
+  gap: 12px;
+}
+
+.btn-primary {
+  background-color: #1976d2;
+  color: #ffffff;
+  padding: 11px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  background-color: #f1f5f9;
+  color: #475569;
+  padding: 11px 20px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.btn-secondary:hover {
+  background-color: #e2e8f0;
+}
