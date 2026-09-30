@@ -1,0 +1,194 @@
+.reception-container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f4f7fb;
+  min-height: calc(100vh - 60px);
+  box-sizing: border-box;
+}
+
+/* 2 Cột chính */
+.reception-left {
+  flex: 1.1;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+.reception-right {
+  flex: 1.3;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 22px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e3a8a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 10px;
+}
+
+/* Hộp tìm kiếm mã hẹn */
+.lookup-box {
+  background: #eff6ff;
+  border: 1px dashed #93c5fd;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+}
+
+.lookup-input-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* Lưới chỉ số sinh tồn (Vitals Grid) */
+.vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.vital-item {
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.vital-item label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.vital-item input {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* Hàng đợi (Queue Table) */
+.queue-filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.queue-table-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.queue-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.queue-table th {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-weight: 700;
+  padding: 10px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.queue-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.queue-table tr:hover {
+  background-color: #f8fbff;
+}
+
+.stt-badge {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 800;
+  color: #1d4ed8;
+  background: #dbeafe;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+/* Trạng thái */
+.status-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.status-chokham {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.status-dangkham {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-dakham {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+/* Modal Phiếu Khám */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.slip-card {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  width: 340px;
+  text-align: center;
+  border: 2px dashed #93c5fd;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.slip-number {
+  font-size: 46px;
+  font-weight: 900;
+  color: #1e40af;
+  margin: 10px 0;
+}

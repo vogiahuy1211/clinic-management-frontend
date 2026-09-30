@@ -6,6 +6,7 @@ import App from "./App.jsx";
 import "./index.css";
 
 // CSS từng phân hệ
+import "./styles/reception.css";
 import "./styles/schedule.css";
 // Khi làm tiếp các trang sau chỉ cần bỏ comment:
 // import './styles/medical-record.css'

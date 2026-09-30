@@ -1,13 +1,13 @@
 import { useState } from "react";
 import PatientBookingPage from "./pages/BookingPage/PatientBookingPage";
+import ReceptionPage from "./pages/ReceptionPage/ReceptionPage";
 import SchedulePage from "./pages/SchedulePage/SchedulePage";
 
 function App() {
-  const [currentPage, setCurrentPage] = useState("booking"); // Mặc định mở trang Đặt lịch
+  const [currentPage, setCurrentPage] = useState("reception"); // Mặc định mở trang Tiếp đón
 
   return (
     <div>
-      {/* Menu chuyển trang */}
       <nav
         style={{
           display: "flex",
@@ -17,6 +17,21 @@ function App() {
           boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
         }}
       >
+        <button
+          onClick={() => setCurrentPage("reception")}
+          style={{
+            padding: "8px 16px",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontWeight: 600,
+            background: currentPage === "reception" ? "#1976d2" : "#f1f5f9",
+            color: currentPage === "reception" ? "#ffffff" : "#475569",
+          }}
+        >
+          📋 Tiếp Đón & Hàng Đợi (Lễ Tân)
+        </button>
+
         <button
           onClick={() => setCurrentPage("booking")}
           style={{
@@ -48,7 +63,8 @@ function App() {
         </button>
       </nav>
 
-      {/* Hiển thị component theo tab */}
+      {/* Render Component */}
+      {currentPage === "reception" && <ReceptionPage />}
       {currentPage === "booking" && <PatientBookingPage />}
       {currentPage === "schedule" && <SchedulePage />}
     </div>
