@@ -9,9 +9,13 @@ const ROOM_API = "http://localhost:8080/api/rooms";
 const DOCTOR_API = "http://localhost:8080/api/doctors";
 const PATIENT_API = "http://localhost:8080/api/patients";
 const SCHEDULE_API = "http://localhost:8080/api/doctor-schedules";
+const SPECIALTY_API = "http://localhost:8080/api/specialties";
 
 function ReceptionPage() {
   const today = new Date().toISOString().split("T")[0];
+
+  const [specialties, setSpecialties] = useState([]);
+  const [selectedSpecialtyId, setSelectedSpecialtyId] = useState("");
 
   const [rooms, setRooms] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -62,13 +66,25 @@ function ReceptionPage() {
         }
       })
       .catch(() => {
-        // Fallback nếu API next-id chưa có
         setFormData((prev) => ({ ...prev, patientId: "Tự động tạo mới" }));
       });
   };
 
-  // 3. Khởi tạo danh mục
+  // 3. Khởi tạo danh mục ban đầu
   useEffect(() => {
+    axios
+      .get(SPECIALTY_API)
+      .then((res) => setSpecialties(res.data))
+      .catch(() => {
+        console.warn(
+          "Chưa có API chuyên khoa riêng, thử lấy từ /api/departments...",
+        );
+        axios
+          .get("http://localhost:8080/api/departments")
+          .then((res) => setSpecialties(res.data))
+          .catch(console.error);
+      });
+
     axios
       .get(ROOM_API)
       .then((res) => setRooms(res.data))
@@ -80,29 +96,29 @@ function ReceptionPage() {
     fetchTodayQueue();
   }, []);
 
-  // 4. Xử lý khi thay đổi Bác Sĩ -> Nhảy phòng khám theo chuyên khoa của bác sĩ
+  // 4. Xử lý khi chọn Chuyên Khoa -> reset bác sĩ & phòng để lọc lại
+  const handleSpecialtyChange = (specId) => {
+    setSelectedSpecialtyId(specId);
+    setFormData((prev) => ({
+      ...prev,
+      doctorId: "",
+      roomId: "",
+    }));
+  };
+
+  // 5. Xử lý khi chọn Bác Sĩ -> tự gán phòng khám cùng chuyên khoa
   const handleDoctorChange = (selectedDoctorId) => {
     const doc = doctors.find((d) => String(d.id) === String(selectedDoctorId));
     let matchedRoomId = "";
 
     if (doc) {
       const docDepartmentId = doc.departmentId || doc.specialtyId;
-      console.log(`Bác sĩ ${doc.id} thuộc Chuyên khoa:`, docDepartmentId);
-
       if (docDepartmentId) {
         const foundRoom = rooms.find((r) => {
           const roomDept = r.departmentId || r.specialtyId || r.machuyenkhoa;
           return roomDept && String(roomDept) === String(docDepartmentId);
         });
-
-        if (foundRoom) {
-          console.log(`=> Đã tìm thấy phòng khớp:`, foundRoom.id);
-          matchedRoomId = foundRoom.id;
-        } else {
-          console.warn(
-            `Chưa tìm thấy phòng nào có mã chuyên khoa: ${docDepartmentId}`,
-          );
-        }
+        if (foundRoom) matchedRoomId = foundRoom.id;
       }
     }
 
@@ -113,7 +129,7 @@ function ReceptionPage() {
     }));
   };
 
-  // 5. Tra cứu lịch hẹn LHxxx
+  // 6. Tra cứu lịch hẹn LHxxx
   const handleLookupAppointment = () => {
     if (!lookupAppointmentId.trim()) {
       alert("Vui lòng nhập Mã lịch hẹn!");
@@ -145,13 +161,20 @@ function ReceptionPage() {
           }
         }
 
-        if (!assignedRoomId && app.doctorId) {
-          const doc = doctors.find((d) => d.id === app.doctorId);
-          const docSpecId = doc?.specialtyId || doc?.specialty?.id;
-          const matched = rooms.find(
-            (r) => (r.specialtyId || r.specialty?.id) === docSpecId,
-          );
-          if (matched) assignedRoomId = matched.id;
+        const doc = doctors.find((d) => String(d.id) === String(app.doctorId));
+        if (doc) {
+          const docSpecId =
+            doc.specialtyId || doc.departmentId || doc.specialty?.id;
+          if (docSpecId) setSelectedSpecialtyId(docSpecId);
+
+          if (!assignedRoomId) {
+            const matched = rooms.find(
+              (r) =>
+                (r.specialtyId || r.departmentId || r.machuyenkhoa) ===
+                docSpecId,
+            );
+            if (matched) assignedRoomId = matched.id;
+          }
         }
 
         setFormData((prev) => ({
@@ -173,7 +196,7 @@ function ReceptionPage() {
       .finally(() => setLookupLoading(false));
   };
 
-  // 6. Xử lý chuyển đổi loại tiếp đón
+  // 7. Xử lý chuyển đổi loại tiếp đón
   const handleTypeChange = (selectedType) => {
     if (selectedType === "TrucTiep") {
       fetchNextPatientId();
@@ -194,7 +217,33 @@ function ReceptionPage() {
     }
   };
 
-  // 7. Gửi tiếp đón
+  // 8. Hàm Làm mới / Reset lại toàn bộ form nhập liệu
+  const handleResetForm = () => {
+    setLookupAppointmentId("");
+    setSelectedSpecialtyId("");
+    setFormData({
+      patientId: "",
+      employeeId: "NV001",
+      roomId: "",
+      doctorId: "",
+      appointmentId: "",
+      receptionDate: today,
+      receptionType: "",
+      initialSymptoms: "",
+      patientName: "",
+      patientPhone: "",
+      patientGender: "Nam",
+      patientDob: "",
+      patientAddress: "",
+      pulse: "",
+      temperature: "",
+      bloodPressure: "",
+      weight: "",
+      height: "",
+    });
+  };
+
+  // 9. Submit tiếp nhận
   const handleSubmitReception = (e) => {
     e.preventDefault();
 
@@ -226,27 +275,7 @@ function ReceptionPage() {
         alert(
           `Tiếp nhận thành công bệnh nhân: ${formData.patientName || formData.patientId}! STT: ${res.data.queueNumber}`,
         );
-        // Reset form
-        setFormData({
-          patientId: "",
-          employeeId: "NV001",
-          roomId: "",
-          doctorId: "",
-          appointmentId: "",
-          receptionDate: today,
-          receptionType: "",
-          initialSymptoms: "",
-          patientName: "",
-          patientPhone: "",
-          patientGender: "Nam",
-          patientDob: "",
-          patientAddress: "",
-          pulse: "",
-          temperature: "",
-          bloodPressure: "",
-          weight: "",
-          height: "",
-        });
+        handleResetForm();
       })
       .catch((err) => {
         alert(err.response?.data?.message || "Lỗi khi tạo lượt tiếp đón!");
@@ -257,7 +286,26 @@ function ReceptionPage() {
     <div className="reception-container">
       {/* CỘT TRÁI: FORM TIẾP NHẬN */}
       <div className="reception-left">
-        <h2 className="panel-title">📋 TIẾP NHẬN BỆNH NHÂN TẠI QUẦY</h2>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "12px",
+          }}
+        >
+          <h2 className="panel-title" style={{ margin: 0, border: "none" }}>
+            📋 TIẾP NHẬN BỆNH NHÂN TẠI QUẦY
+          </h2>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleResetForm}
+            style={{ padding: "6px 12px" }}
+          >
+            🔄 Làm Mới
+          </button>
+        </div>
 
         {/* Khung tra cứu mã hẹn LHxxx */}
         <div className="lookup-box">
@@ -290,7 +338,7 @@ function ReceptionPage() {
           {/* DÒNG 1: MÃ BỆNH NHÂN & LOẠI TIẾP ĐÓN */}
           <div className="form-row">
             <div>
-              <label className="input-label">Mã Bệnh Nhân (Hệ thống cấp)</label>
+              <label className="input-label">Mã Bệnh Nhân *</label>
               <input
                 type="text"
                 className="form-control"
@@ -300,7 +348,7 @@ function ReceptionPage() {
                     ? "Mã BN theo phiếu hẹn"
                     : formData.receptionType === "TrucTiep"
                       ? "Đang cấp mã tự tăng..."
-                      : "Vui lòng chọn loại tiếp đón hoặc tra mã hẹn"
+                      : "Vui lòng chọn hình thức tiếp đón hoặc tra mã hẹn"
                 }
                 readOnly
                 style={{
@@ -313,7 +361,7 @@ function ReceptionPage() {
             </div>
 
             <div>
-              <label className="input-label">Loại Tiếp Đón *</label>
+              <label className="input-label">Hình thức tiếp đón *</label>
               <select
                 className="form-control"
                 value={formData.receptionType}
@@ -321,21 +369,21 @@ function ReceptionPage() {
                 required
               >
                 <option value="" disabled>
-                  -- Chọn loại tiếp đón --
+                  -- Chọn hình thức --
                 </option>
                 <option value="TrucTiep">Trực Tiếp</option>
                 <option
                   value="HenTruoc"
                   disabled={formData.receptionType !== "HenTruoc"}
                 >
-                  Hẹn Trước
+                  Hẹn Trước (Website - Tự động nhận diện)
                 </option>
                 <option value="CapCuu">Cấp Cứu</option>
               </select>
             </div>
           </div>
 
-          {/* DÒNG TIẾP THEO: HIỆN LIỀN MẠCH KHI CHỌN "TRỰC TIẾP" */}
+          {/* DÒNG THÔNG TIN BỆNH NHÂN VÃNG LAI (HIỆN KHI CHỌN TRỰC TIẾP) */}
           {formData.receptionType === "TrucTiep" && (
             <>
               <div className="form-row">
@@ -412,7 +460,36 @@ function ReceptionPage() {
             </>
           )}
 
-          {/* DÒNG: BÁC SĨ & PHÒNG KHÁM */}
+          {/* DÒNG: CHỌN CHUYÊN KHOA KHÁM */}
+          <div style={{ marginBottom: "12px" }}>
+            <label className="input-label">Chuyên Khoa Khám *</label>
+            <select
+              className="form-control"
+              value={selectedSpecialtyId}
+              onChange={(e) => handleSpecialtyChange(e.target.value)}
+              required
+            >
+              <option value="">-- Chọn chuyên khoa khám bệnh --</option>
+              {specialties.length > 0 ? (
+                specialties.map((spec) => (
+                  <option key={spec.id} value={spec.id}>
+                    {spec.name || spec.specialtyName || spec.departmentName} (
+                    {spec.id})
+                  </option>
+                ))
+              ) : (
+                <>
+                  <option value="CK_NOI">Chuyên Khoa Nội Tổng Quát</option>
+                  <option value="CK_NHI">Chuyên Khoa Nhi</option>
+                  <option value="CK_TIM">Chuyên Khoa Tim Mạch</option>
+                  <option value="CK_RHM">Chuyên Khoa Răng Hàm Mặt</option>
+                  <option value="CK_MAT">Chuyên Khoa Mắt</option>
+                </>
+              )}
+            </select>
+          </div>
+
+          {/* DÒNG: BÁC SĨ & PHÒNG KHÁM (LỌC THEO CHUYÊN KHOA) */}
           <div className="form-row">
             <div>
               <label className="input-label">Bác Sĩ Phụ Trách *</label>
@@ -420,15 +497,27 @@ function ReceptionPage() {
                 className="form-control"
                 value={formData.doctorId}
                 onChange={(e) => handleDoctorChange(e.target.value)}
+                disabled={!selectedSpecialtyId}
                 required
               >
-                <option value="">-- Chọn bác sĩ --</option>
-                {doctors.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.user?.fullName || d.fullName || d.name || "Bác sĩ"} (
-                    {d.id})
-                  </option>
-                ))}
+                <option value="">
+                  {selectedSpecialtyId
+                    ? "-- Chọn bác sĩ --"
+                    : "-- Chọn chuyên khoa trước --"}
+                </option>
+                {doctors
+                  .filter((d) => {
+                    if (!selectedSpecialtyId) return false;
+                    const docSpec =
+                      d.departmentId || d.specialtyId || d.specialty?.id;
+                    return String(docSpec) === String(selectedSpecialtyId);
+                  })
+                  .map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.user?.fullName || d.fullName || d.name || "Bác sĩ"} (
+                      {d.id})
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -440,20 +529,20 @@ function ReceptionPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, roomId: e.target.value })
                 }
+                disabled={!selectedSpecialtyId}
                 required
               >
-                <option value="">-- Chọn phòng khám --</option>
+                <option value="">
+                  {selectedSpecialtyId
+                    ? "-- Chọn phòng khám --"
+                    : "-- Chọn chuyên khoa trước --"}
+                </option>
                 {rooms
                   .filter((r) => {
-                    if (!formData.doctorId) return true;
-                    const currentDoc = doctors.find(
-                      (d) => String(d.id) === String(formData.doctorId),
-                    );
-                    const docDept =
-                      currentDoc?.departmentId || currentDoc?.specialtyId;
+                    if (!selectedSpecialtyId) return false;
                     const roomDept =
                       r.departmentId || r.specialtyId || r.machuyenkhoa;
-                    return !docDept || String(roomDept) === String(docDept);
+                    return String(roomDept) === String(selectedSpecialtyId);
                   })
                   .map((r) => (
                     <option key={r.id} value={r.id}>
@@ -464,8 +553,11 @@ function ReceptionPage() {
             </div>
           </div>
 
+          {/* TRIỆU CHỨNG */}
           <div>
-            <label className="input-label">Triệu Chứng / Lý Do Đến Khám</label>
+            <label className="input-label">
+              Triệu Chứng / Lý Do Đến Khám *
+            </label>
             <textarea
               className="form-control"
               rows="2"
@@ -556,26 +648,11 @@ function ReceptionPage() {
         </form>
       </div>
 
-      {/* CỘT PHẢI: HÀNG ĐỢI */}
+      {/* CỘT PHẢI: HÀNG ĐỢI HÔM NAY */}
       <div className="reception-right">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <h2 className="panel-title" style={{ margin: 0, border: "none" }}>
-            👥 HÀNG ĐỢI KHÁM HÔM NAY ({queueList.length})
-          </h2>
-          <button
-            className="btn btn-secondary"
-            onClick={fetchTodayQueue}
-            style={{ padding: "6px 12px" }}
-          >
-            🔄 Làm Mới
-          </button>
-        </div>
+        <h2 className="panel-title">
+          👥 HÀNG ĐỢI KHÁM HÔM NAY ({queueList.length})
+        </h2>
 
         <div className="queue-filter-bar" style={{ marginTop: "12px" }}>
           <select
@@ -638,7 +715,7 @@ function ReceptionPage() {
         </div>
       </div>
 
-      {/* MODAL XEM & IN PHIẾU KHÁM BỆNH */}
+      {/* MODAL IN PHIẾU KHÁM */}
       {createdSlip && (
         <div className="modal-overlay">
           <div className="slip-card">
